@@ -1,16 +1,25 @@
-import React, { useState } from 'react'
+import React, { useState,useEffect, useContext } from 'react'
 import { Modal,Button, Form } from 'react-bootstrap'
-import AddBlogsCall from '../../api/AddBlogCall';
-import EditBlogCall from '../../api/EditBlogCall';
-import baseUrl from '../../api/BaseUrl';
+import BlogContext from '../../store/blog-context';
 
-function InputModal({showModal,isEdit,item,onClose}) {
+function InputModal({showModal,isEdit,item,onClose,id}) {
+
+  const { addBlog, editBlog, } = useContext(BlogContext);
+
     const [blogData,setBlogData]=useState({
-        id:isEdit?item.id:'',
         title:isEdit?item.title:'',
         description:isEdit?item.description:'',
         imageUrl:isEdit?item.imageUrl:''
     });
+    useEffect(() => {
+      if (isEdit && item) {
+        setBlogData({
+          title: item.title || "",
+          description: item.description || "",
+          imageUrl: item.imageUrl || "",
+        });
+      }
+    }, [isEdit, item])
    const handleChange=(e)=>{
         e.preventDefault();
         const {name,value}=e.target;
@@ -20,32 +29,26 @@ function InputModal({showModal,isEdit,item,onClose}) {
             }
         })
     };
-    const handleSubmit=async (e)=>{
-      console.log("thiss is save isedit is",isEdit);
-      console.log("thiss is save item is",blogData);
+    const handleAddPost=async (e)=>{
         e.preventDefault();
         try {
-          const response = await fetch(`${baseUrl}/blogs`, { // Ensure correct API endpoint
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              title:blogData.title,
-              description:blogData.description,
-              imageUrl:blogData.imageUrl,
-            }),
-          });
-      
-          if (!response.ok) {
-            throw new Error(`HTTP Error! Status: ${response.status}`);
-          }
-      
-          const data = await response.json();
-          console.log("Blog added successfully:", data);
-          return data;
+         addBlog(blogData)
         } catch (error) {
           console.error("Error adding blog:", error);
+        }finally{
+        onClose()
+        
+        }
+        
+
+    }
+    const handleEditPost=async (e)=>{
+        e.preventDefault();
+        try {
+          
+          editBlog(item._id,blogData);
+        } catch (error) {
+          console.error("Error edit blog:", error);
         }finally{
         onClose()
         
@@ -79,7 +82,7 @@ function InputModal({showModal,isEdit,item,onClose}) {
 
         <Modal.Footer>
           <Button variant="secondary" onClick={()=>onClose()}>Close</Button>
-          <Button variant="primary" onClick={handleSubmit}>Save</Button>
+          <Button variant="primary" onClick={isEdit?handleEditPost:handleAddPost}>Save</Button>
         </Modal.Footer>
       </Modal >
   )

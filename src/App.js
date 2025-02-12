@@ -1,8 +1,8 @@
-import { use, useState } from "react";
+import { useState } from "react";
 import Blogs from "./components/Blogs";
-import Header from "./components/Header";
 import InputModal from "./components/UI/InputModal";
 import { Container,Button } from "react-bootstrap";
+import BlogProvider from "./store/BlogProvider";
 
 
 
@@ -21,12 +21,11 @@ const onEditHandler=(item)=>{
     isEdit:true,
     item:item
   })
-  console.log(item)
   openModal();
 
 }
   return (
-    <div className="App">
+    <BlogProvider>
       <header className="App-header">
       <Container className='text-center border-bottom p-3 border-secondary mb-3'>
         <h1 className='text-dark'>
@@ -39,10 +38,11 @@ const onEditHandler=(item)=>{
     </Container>
       </header>
       <main>
-        <InputModal showModal={show} onClose={closeModal} isEdit={edit.isEdit} item={edit.item}/>
+        <InputModal showModal={show} onClose={closeModal} isEdit={edit.isEdit} item={edit.item} id={edit._id}/>
         <Blogs onEdit={onEditHandler}/>
       </main>
-    </div>
+    </BlogProvider>
+
   );
 }
 
